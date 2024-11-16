@@ -9,22 +9,25 @@ import multer from "multer";
 import { UploadClient } from "@uploadcare/upload-client";
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import dotenv from "dotenv";
+
 const app = express();
 
 app.use(express.json());
 
 app.use(cors());
+dotenv.config();
 
 // const uploadClient = new UploadClient({
 //   publicKey: "6feca71c7e13682e4765",
 // });
 const firebaseConfig = {
-  apiKey: "AIzaSyD5WNYsDt1rflQgezH133LrcYxd7PvLdb4",
-  authDomain: "nutlipimages.firebaseapp.com",
-  projectId: "nutlipimages",
-  storageBucket: "nutlipimages.appspot.com",
-  messagingSenderId: "223737850307",
-  appId: "1:223737850307:web:8001ef4f78d3afd5f77576",
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.FIREBASE_APP_ID,
   measurementId: "G-DDFWDY8JS6",
 };
 const firebaseApp = initializeApp(firebaseConfig);
