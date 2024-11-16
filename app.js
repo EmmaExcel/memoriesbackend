@@ -4,38 +4,58 @@ import mongoose from "mongoose";
 import { MONGO_URI } from "./_db.js";
 import Memory from "./model/memoryModel.js";
 import cors from "cors";
+import cloudinary from "cloudinary";
+import multer from "multer";
+import { UploadClient } from "@uploadcare/upload-client";
+import { initializeApp } from "firebase/app";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 const app = express();
 
 app.use(express.json());
 
 app.use(cors());
 
-app.post("/memory", (req, res) => {
+// const uploadClient = new UploadClient({
+//   publicKey: "6feca71c7e13682e4765",
+// });
+const firebaseConfig = {
+  apiKey: "AIzaSyD5WNYsDt1rflQgezH133LrcYxd7PvLdb4",
+  authDomain: "nutlipimages.firebaseapp.com",
+  projectId: "nutlipimages",
+  storageBucket: "nutlipimages.appspot.com",
+  messagingSenderId: "223737850307",
+  appId: "1:223737850307:web:8001ef4f78d3afd5f77576",
+  measurementId: "G-DDFWDY8JS6",
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const storage = getStorage(firebaseApp);
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+app.post("/memory", upload.array("images"), async (req, res) => {
   try {
-    if (
-      !req.body.title ||
-      !req.body.images ||
-      !req.body.content ||
-      !req.body.author
-    ) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
+    const imageUploads = req.files.map(async (file) => {
+      const storageRef = ref(
+        storage,
+        `memories/${Date.now()}-${file.originalname}`
+      );
+      await uploadBytes(storageRef, file.buffer);
+      return getDownloadURL(storageRef);
+    });
 
-    const newMemory = new Memory({
+    const imageUrls = await Promise.all(imageUploads);
+
+    const memory = await Memory.create({
       title: req.body.title,
-      images: req.body.images,
-      content: req.body.content,
       author: req.body.author,
+      content: req.body.content,
+      images: imageUrls,
     });
 
-    const memory = Memory.create(newMemory);
-    res.status(201).json({
-      message: "Memory created",
-      data: newMemory,
-    });
+    res.status(201).json({ success: true, data: memory });
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ message: error.message });
+    console.log(error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
