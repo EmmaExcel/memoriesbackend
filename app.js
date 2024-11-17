@@ -37,21 +37,36 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 app.post("/memory", upload.array("images"), async (req, res) => {
   try {
-    if (!req.files) {
-      return res.status(400).json({ success: false, error: "No files uploaded" });
+    const imageUrls = [];
+
+    // Handle uploaded files
+    if (req.files && req.files.length > 0) {
+      const uploads = req.files.map(async (file) => {
+        const storageRef = ref(
+          storage,
+          `memories/${Date.now()}-${file.originalname}`
+        );
+        await uploadBytes(storageRef, file.buffer);
+        return getDownloadURL(storageRef);
+      });
+      const uploadedUrls = await Promise.all(uploads);
+      imageUrls.push(...uploadedUrls);
     }
 
-    const imageUploads = req.files.map(async (file) => {
-      const storageRef = ref(
-        storage,
-        `memories/${Date.now()}-${file.originalname}`
-      );
-      await uploadBytes(storageRef, file.buffer);
-      return getDownloadURL(storageRef);
-    });
+    // Handle URLs passed in the request body
+    if (req.body.imageUrls) {
+      const bodyImageUrls = Array.isArray(req.body.imageUrls)
+        ? req.body.imageUrls
+        : [req.body.imageUrls];
+      imageUrls.push(...bodyImageUrls);
+    }
 
-    const imageUrls = await Promise.all(imageUploads);
+    // Check if any images were provided
+    if (imageUrls.length === 0) {
+      return res.status(400).json({ success: false, error: "No files or URLs provided" });
+    }
 
+    // Create the memory
     const memory = await Memory.create({
       title: req.body.title,
       author: req.body.author,
@@ -61,7 +76,7 @@ app.post("/memory", upload.array("images"), async (req, res) => {
 
     res.status(201).json({ success: true, data: memory });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
