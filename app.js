@@ -37,6 +37,10 @@ const upload = multer({ storage: multer.memoryStorage() });
 
 app.post("/memory", upload.array("images"), async (req, res) => {
   try {
+    if (!req.files) {
+      return res.status(400).json({ success: false, error: "No files uploaded" });
+    }
+
     const imageUploads = req.files.map(async (file) => {
       const storageRef = ref(
         storage,
