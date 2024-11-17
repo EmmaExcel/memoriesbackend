@@ -54,10 +54,10 @@ app.post("/memory", upload.array("images"), async (req, res) => {
     }
 
     // Handle URLs passed in the request body
-    if (req.body.imageUrls) {
-      const bodyImageUrls = Array.isArray(req.body.imageUrls)
-        ? req.body.imageUrls
-        : [req.body.imageUrls];
+    if (req.body.images) {
+      const bodyImageUrls = Array.isArray(req.body.images)
+        ? req.body.images
+        : [req.body.images]; // Ensure it's an array
       imageUrls.push(...bodyImageUrls);
     }
 
