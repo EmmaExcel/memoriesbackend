@@ -1,7 +1,7 @@
 import express from "express";
 import Memory from "../model/memoryModel.js";
 import User from "../model/UserModel.js";
-import bcrypt from "bcrypt";
+import bcrypt from bcryptjs;
 import jwt from "jsonwebtoken";
 import { auth } from "../firebase.js";
 import { GoogleAuthProvider, signInWithCredential } from "firebase/auth";

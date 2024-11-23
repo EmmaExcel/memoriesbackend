@@ -1,7 +1,7 @@
 import express from "express";
 import User from "../model/UserModel.js";
 import { verifyToken } from "../middleware/verifyToken.js";
-import bcrypt from "bcrypt";
+import bcrypt from bcryptjs;
 import { storage } from "../firebase.js";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import multer from "multer";
