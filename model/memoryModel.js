@@ -7,8 +7,7 @@ const MemorySchema = new mongoose.Schema({
     required: true,
   },
   images: {
-    type: [String],
-    required: true,
+    type: [String]
   },
   content: {
     type: String,
